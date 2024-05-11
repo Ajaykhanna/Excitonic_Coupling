@@ -98,19 +98,14 @@ def extract_atomic_weights(log_file_path):
 
 def vertical_excitation_energies(file_path, excited_state=1):
     """
-    This Python function reads a file, searches for a specific pattern, extracts a value from the
-    matching line, and returns it as a float.
-
-    :param file_path: The `file_path` parameter in the `vertical_excitation_energies` function is a
-    string that represents the path to the file from which you want to extract vertical excitation
-    energies. This function reads the specified file and looks for the vertical excitation energy value
-    for a specified excited state
-    :param excited_state: The `excited_state` parameter in the `vertical_excitation_energies` function
-    is used to specify which excited state's energy you want to extract from the file. It is an optional
-    parameter with a default value of 1, meaning that if you do not provide a value for `exc, defaults
-    to 1 (optional)
-    :return: the vertical excitation energy in electron volts (eV) for the specified excited state from
-    the file located at the given file path.
+    Reads a file and extracts the vertical excitation energy for a specified excited state.
+    
+    Parameters:
+        file_path (str): The path to the file containing the vertical excitation energy data.
+        excited_state (int, optional): The index of the excited state for which to extract the vertical excitation energy. Defaults to 1.
+    
+    Returns:
+        float: The vertical excitation energy in electron volts (eV) for the specified excited state.
     """
     with open(file_path, "r") as file:
         lines = file.readlines()
@@ -173,17 +168,20 @@ def extract_TDM_xyz_values(file_path):
     return np.array([tdm_x, tdm_y, tdm_z])
 
 
+
 def center_of_mass(atomic_weights, coordinates):
     """
-    The function calculates the center of mass of a system based on atomic weights and coordinates.
+    Calculates the center of mass of a system based on atomic weights and coordinates.
 
-    :param atomic_weights: Atomic weights are the weights of individual atoms in a molecule or system.
-    They are typically given in atomic mass units (u) and represent the mass of each atom relative to
-    the unified atomic mass unit (approximately the mass of a proton or neutron)
-    :param coordinates: Coordinates is a NumPy array containing the x, y, and z coordinates of atoms in
-    a molecule. Each row represents the coordinates of an atom in the format [x, y, z]
-    :return: The function `center_of_mass` is returning the coordinates of the center of mass as a NumPy
-    array with three elements: x_COM, y_COM, and z_COM.
+    Parameters:
+        atomic_weights (numpy.ndarray): Atomic weights are the weights of individual atoms in a molecule or system.
+        They are typically given in atomic mass units (u) and represent the mass of each atom relative to the unified
+        atomic mass unit (approximately the mass of a proton or neutron).
+        coordinates (numpy.ndarray): Coordinates is a NumPy array containing the x, y, and z coordinates of atoms in a molecule.
+        Each row represents the coordinates of an atom in the format [x, y, z].
+
+    Returns:
+        numpy.ndarray: The coordinates of the center of mass as a NumPy array with three elements: x_COM, y_COM, and z_COM.
     """
     # print(atomic_weights)
     assert len(atomic_weights) == len(coordinates)
@@ -202,28 +200,19 @@ def center_of_mass(atomic_weights, coordinates):
     return np.array([x_COM, y_COM, z_COM])
 
 
+
 def coupling_via_PDA(TDM_D, TDM_A, COM_D, COM_A):
     """
-    This Python function calculates the coupling between two transition dipole moments using the
-    polarizability derivative approximation method.
+    Calculates the excitonic coupling between two transition dipole moments using the polarizability derivative approximation (PDA) method.
 
-    :param TDM_D: The `TDM_D` parameter in the `coupling_via_PDA` function likely represents the
-    Transition Dipole Moment (TDM) for molecule D. This parameter is used in the calculation to
-    determine the coupling between two molecules based on their transition dipole moments and center of
-    mass positions
-    :param TDM_A: The function `coupling_via_PDA` calculates the coupling between two transition dipole
-    moments (TDMs) in a photoinduced electron transfer process. The parameters required for the function
-    are `TDM_D`, `TDM_A`, `COM_D`, and `COM_A`
-    :param COM_D: It looks like you have provided a function `coupling_via_PDA` that calculates coupling
-    between two transition dipole moments based on certain parameters. However, you have not provided
-    the complete information about the parameters. Could you please provide the missing information
-    about the parameters COM_D, COM_A, TDM
-    :param COM_A: It looks like you were about to provide some information about the parameters, but you
-    stopped after mentioning "COM_A:". Could you please provide the rest of the information for the
-    parameters COM_A, TDM_D, TDM_A, and COM_D so that I can assist you further with the `cou
-    :return: The function `coupling_via_PDA` is returning a value calculated based on the input
-    parameters `TDM_D`, `TDM_A`, `COM_D`, and `COM_A`. The returned value is calculated as 27.211396132
-    multiplied by the expression `((np.dot(TDM_D,TDM_A)/R**3) - (3*(np.dot(TDM_D,COM
+    Parameters:
+        TDM_D (numpy.ndarray): The transition dipole moment vector for molecule D.
+        TDM_A (numpy.ndarray): The transition dipole moment vector for molecule A.
+        COM_D (numpy.ndarray): The center of mass coordinates for molecule D.
+        COM_A (numpy.ndarray): The center of mass coordinates for molecule A.
+
+    Returns:
+        float: The excitonic coupling between the two transition dipole moments in eV.
     """
 
     COM_D = COM_D * ANGS_2_BOHR
