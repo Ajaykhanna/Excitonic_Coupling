@@ -36,6 +36,7 @@ def banner(title, char="=", width=80):
 # Print the banner
 banner("Coulombic Coupling Via Diabatization")
 
+
 def vertical_excitation_energies(file_path, excited_state=1):
     """
     Reads a file and extracts the vertical excitation energy for a specified excited state.
@@ -43,7 +44,7 @@ def vertical_excitation_energies(file_path, excited_state=1):
     Args:
         file_path (str): The path to the file containing the vertical excitation energy data.
         excited_state (int, optional): The index of the excited state for which to extract
-        the vertical excitation energy. Defaults to 1.
+            the vertical excitation energy. Defaults to 1.
 
     Returns:
         float: The vertical excitation energy in electron volts (eV) for the specified excited state.
@@ -82,62 +83,51 @@ def vertical_excitation_energies(file_path, excited_state=1):
         if len(fields) >= 5:
             vee_eV = fields[4]
 
-    return float(vee_eV)
+    return float(vee_eV) / HA_2_eV
 
 
-def extract_TDM_xyz_values(file_path, state=0):
+def extract_TDM_xyz_values(file_path, excited_state=1):
     """
-    Extracts the X, Y, and Z values of transition dipole moments from a file containing TDM xyz values.
+    Extracts the transition electric dipole moment (TDM) values for a specified excited state from a file.
 
     Args:
-        file_path (str): The path to the file containing the TDM xyz values.
-        state (int, optional): The index of the excited state to extract the TDM values for. Defaults to 0.
+        file_path (str): The path to the file containing the TDM data.
+        excited_state (int, optional): The index of the excited state for which to extract the TDM values. Defaults to 1.
 
     Returns:
-        numpy.ndarray: A NumPy array containing the extracted X, Y, and Z values of the TDM.
-    """
-    """
-    This function extracts the X, Y, and Z values of transition dipole moments from a file containing
-    TDM xyz values.
-    
-    :param file_path: The function `extract_TDM_xyz_values` reads a file and extracts the X, Y, and Z
-    values related to transition electric dipole moments (TDM) from a specific line in the file. To use
-    this function, you need to provide the file path as the `file_path` parameter
-    :return: The function `extract_TDM_xyz_values` reads a file specified by `file_path`, searches for a
-    specific pattern in the file, and extracts the X, Y, and Z values related to transition electric
-    dipole moments (TDM). If the pattern is found, it returns a NumPy array containing the extracted X,
-    Y, and Z values of the TDM.
+        list[float]: A list of the x, y, and z components of the TDM for the specified excited state, or an error message if the pattern or excited state is not found.
     """
     with open(file_path, "r") as file:
         lines = file.readlines()
 
-    # Find the index of the line containing the specified pattern
-    start_index = next(
-        (
-            i
-            for i, line in enumerate(lines)
-            if "Ground to excited state transition electric dipole moments (Au):"
-            in line
-        ),
-        None,
-    )
+    # Find the index of the pattern
+    pattern = "Ground to excited state transition electric dipole moments (Au):"
+    start_index = next((i for i, line in enumerate(lines) if pattern in line), None)
 
-    # Extract the relevant line
-    if start_index is not None:
-        xyz_line = lines[start_index + state + 2]
+    if start_index is None:
+        return f"Pattern '{pattern}' not found in the file."
 
-        # Extract the X, Y, and Z values
-        fields = xyz_line.split()
-        if len(fields) >= 6:
-            tdm_x, tdm_y, tdm_z = float(fields[1]), float(fields[2]), float(fields[3])
+    # Extract the required rows
+    data_lines = lines[start_index + 2 : start_index + 5]
 
-    return np.array([tdm_x, tdm_y, tdm_z])
+    # Find the row with the specified excited state
+    for line in data_lines:
+        row = line.split()
+        try:
+            if int(row[0]) == excited_state:
+                return [float(value) for value in row[1:4]]
+        except ValueError:
+            continue
+
+    return f"Excited state {excited_state} not found in the expected rows."
 
 
 def diabatize(dims1, dims2, monA, monB, E1, E2):
     """
     Computes the diabatic coupling (J) between the first two excited states of a dimer
     molecule using the transition dipole moments (TDMs) of the monomer states.
+
+    Note: Units of both TDMs and energies are in atomic units and should be.
 
     Parameters:
         dims1 (1xn matrix): TDMs of the s1 and s2 states of the dimer.
@@ -166,10 +156,10 @@ def diabatize(dims1, dims2, monA, monB, E1, E2):
     2x2 matrix
     """
 
-    dim = np.concatenate((dims1, dims2)).reshape(2, len(dims1))
-    mon = np.concatenate((monA, monB)).reshape(2, len(monA))
+    dimer = np.concatenate((dims1, dims2)).reshape(2, len(dims1))
+    monomer = np.concatenate((monA, monB)).reshape(2, len(monA))
 
-    M = np.dot(dim, mon.T)
+    M = np.dot(dimer, monomer.T)
 
     U, s, Vt = np.linalg.svd(M)
 
@@ -185,6 +175,9 @@ def diabatize(dims1, dims2, monA, monB, E1, E2):
 def main():
     parser = argparse.ArgumentParser(description="Supramolecular coupling calculation")
     parser.add_argument("--dimer_filename", type=str, help="Dimer log file")
+    parser.add_argument(
+        "--excited_states", type=int, nargs="+", help="Excited states to consider"
+    )
     parser.add_argument("--donor_filename", type=str, help="Donor log file")
     parser.add_argument("--acceptor_filename", type=str, help="Acceptor log file")
     args = parser.parse_args()
@@ -192,20 +185,20 @@ def main():
     acceptor_file = args.acceptor_filename
     donor_file = args.donor_filename
     dimer_file = args.dimer_filename
+    excited_states = args.excited_states
 
     dimer_TDM_1, E1 = extract_TDM_xyz_values(
-        dimer_file, state=0
+        dimer_file, excited_state=excited_states[0]
     ), vertical_excitation_energies(dimer_file, excited_state=1)
     dimer_TDM_2, E2 = extract_TDM_xyz_values(
-        dimer_file, state=1
+        dimer_file, excited_state=excited_states[1]
     ), vertical_excitation_energies(dimer_file, excited_state=2)
     acceptor_TDM, donor_TDM = extract_TDM_xyz_values(
-        acceptor_file, state=0
-    ), extract_TDM_xyz_values(donor_file, state=0)
+        acceptor_file, excited_state=1
+    ), extract_TDM_xyz_values(donor_file, excited_state=1)
 
-
-    print(f"Dimer TDM-1: {dimer_TDM_1}, Dimer E1: {E1}")
-    print(f"Dimer TDM-2: {dimer_TDM_2}, Dimer E2: {E2}")
+    print(f"Dimer TDM-1: {dimer_TDM_1}, Dimer E1: {E1 * HA_2_eV:.4} eV")
+    print(f"Dimer TDM-2: {dimer_TDM_2}, Dimer E2: {E2 * HA_2_eV:.4} eV")
     print(f"Acceptor TDM: {acceptor_TDM},\nDonor TDM: {donor_TDM}")
 
     print(
