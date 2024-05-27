@@ -121,6 +121,25 @@ def save_xyz(df, filename):
 
 
 def main():
+    """
+    Translates the NBD molecule relative to the geometric center of the NR molecule.
+
+    This script takes in the filenames for the NBD and NR log files, computes the
+    geometric centers of each molecule, and then translates the NBD molecule to a range
+    of distances from the NR geometric center. The translated NBD coordinates are saved to output files.
+
+    The script accepts the following arguments:
+    - `--dye_1_filename`: Filename of the NBD log file
+    - `--dye_2_filename`: Filename of the NR log file
+    - `--max_distance`: Maximum distance to translate the NBD molecule (default is 10.0 Angstroms)
+    - `--step_size`: Step size for the translation (default is 0.5 Angstroms)
+    - `--output`: Output filename prefix for the translated NBD coordinates
+
+    The script first loads the XYZ files for the NBD and NR molecules, computes their geometric
+    centers, and prints the original distance between the centers. It then translates the NBD
+    molecule to a range of distances from the NR geometric center and saves the translated
+    coordinates to output files.
+    """
     banner("Relative Translation of NBD and NR Molecules")
     parser = argparse.ArgumentParser(
         description="Translate NBD Relative to Geometric Center of NR"
