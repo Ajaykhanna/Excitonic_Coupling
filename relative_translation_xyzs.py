@@ -63,7 +63,7 @@ def compute_geometric_center(df):
     Returns:
         numpy.ndarray: The 3D coordinates of the geometric center.
     """
-    return df[["X", "Y", "Z"]].mean().values
+    return df[["X", "Y", "Z"]].mean(axis=0).values
 
 
 def translate_molecule_to_distance(
@@ -97,9 +97,10 @@ def translate_molecule_to_distance(
     translation_vector = new_geo_center - geo_center_current
 
     # Translate the coordinates
-    df[["X", "Y", "Z"]] += translation_vector
+    translated_df = df.copy(deep=True)
+    translated_df[["X", "Y", "Z"]] += translation_vector
 
-    return df
+    return translated_df
 
 
 def save_xyz(df, filename):
@@ -186,7 +187,7 @@ def main():
     else:
         new_COMD_COMA_distance = np.arange(current_distance, 10.5, 0.5)
 
-    for idx, distance in enumerate(new_COMD_COMA_distance):
+    for distance in new_COMD_COMA_distance:
         # Translate the NBD molecule
         df_nbd_translated = translate_molecule_to_distance(
             df_nbd, geo_center_nr, geo_center_nbd, distance
