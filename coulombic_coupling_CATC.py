@@ -68,10 +68,10 @@ def read_Zxyzs(input_file: str) -> np.ndarray:
                     input_geometry[row] = atNum, x, y, z
                 break  # Exit loop after reading all atoms
 
-    return input_geometry
+    return natoms, input_geometry
 
 
-def read_NTOs(g09_file: str, natoms: int, atNums: list) -> np.ndarray:
+def read_NTOs(g09_file: str, natoms: int, atNums: list, chg_method: str) -> np.ndarray:
     """
     Reads a G09 logfile and returns the atomic-centered Natural Transition Charges (NTO),
     obtained via the G09 input line:
@@ -148,18 +148,17 @@ def main():
     parser = argparse.ArgumentParser(description="Process TDM and COM data.")
     parser.add_argument("--dye_1_filename", type=str, help="Filename of dye 1 log file")
     parser.add_argument("--dye_2_filename", type=str, help="Filename of dye 2 log file")
-    parser.add_argument("--nAtoms_dye1", type=int, help="Number of atoms in dye 1")
-    parser.add_argument("--nAtoms_dye2", type=int, help="Number of atoms in dye 2")
+    parser.add_argument("--chg_method", type=str, default="Mulliken", help="Charge method: Mulliken or RESP")
+    #parser.add_argument("--nAtoms_dye1", type=int, help="Number of atoms in dye 1")
+    #parser.add_argument("--nAtoms_dye2", type=int, help="Number of atoms in dye 2")
     args = parser.parse_args()
 
-    dye1_coords = read_Zxyzs(args.dye_1_filename)
-    dye2_coords = read_Zxyzs(args.dye_2_filename)
+    nAtoms_dye1, dye1_coords = read_Zxyzs(args.dye_1_filename)
+    nAtoms_dye2, dye2_coords = read_Zxyzs(args.dye_2_filename)
 
-    dye1_NTOs = read_NTOs(args.dye_1_filename, args.nAtoms_dye1, dye1_coords[:, 0])
-    dye2_NTOs = read_NTOs(args.dye_2_filename, args.nAtoms_dye2, dye2_coords[:, 0])
+    dye1_NTOs = read_NTOs(args.dye_1_filename, nAtoms_dye1, dye1_coords[:, 0], args.chg_method)
+    dye2_NTOs = read_NTOs(args.dye_2_filename, nAtoms_dye2, dye2_coords[:, 0], args.chg_method)
 
-    # print(f'NBD TCs: {dye1_NTOs}')
-    # print(f'NR TCs : {dye2_NTOs}')
     print(
         f"Excitonic Coupling via Transition Charges: {coupling_via_TC(dye1_NTOs, dye2_NTOs, dye1_coords[:,1:], dye2_coords[:,1:]) * HA_TO_EV:.5} eV"
     )
