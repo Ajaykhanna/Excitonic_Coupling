@@ -80,13 +80,13 @@ def extract_vertical_excitation_energy(file_path, excited_state=1):
 def extract_tdm_xyz_values(file_path, excited_state=1, max_states=10):
     """
     Extract the transition electric dipole moment (TDM) values for a specified excited state from a file.
-    
+
     Args:
         file_path (str): The path to the file containing the TDM data.
         excited_state (int, optional): The index of the excited state for which to extract the TDM values.
             Default is 1.
         max_states (int, optional): The maximum number of excited states to consider. Default is 10.
-    
+
     Returns:
         list[float] or str: A list of the x, y, and z components of the TDM for the specified excited state,
             or an error message if the pattern or excited state is not found.
@@ -154,9 +154,9 @@ def main():
     """
     Compute the diabatic coupling (J) between the first two excited states of a dimer
     molecule using the transition dipole moments (TDMs) of the monomer states.
-    
+
     Note: Units of both TDMs and energies should be in atomic units.
-    
+
     Args:
         dimer_tdm_1 (numpy.ndarray): TDMs of the s1 state of the dimer.
         dimer_tdm_2 (numpy.ndarray): TDMs of the s2 state of the dimer.
@@ -164,11 +164,11 @@ def main():
         donor_tdm (numpy.ndarray): TDMs of the s1 state of the donor monomer.
         e1 (float): Energy of the s1 state of the dimer.
         e2 (float): Energy of the s2 state of the dimer.
-    
+
     Returns:
         float: The diabatic coupling (J) between the first two excited states of the dimer.
     """
-    
+
     parser = argparse.ArgumentParser(description="Supramolecular coupling calculation")
     parser.add_argument("--dimer_filename", type=str, help="Dimer log file")
     parser.add_argument(
@@ -176,7 +176,9 @@ def main():
     )
     parser.add_argument("--donor_filename", type=str, help="Donor log file")
     parser.add_argument("--acceptor_filename", type=str, help="Acceptor log file")
-    parser.add_argument("--max_states", type=int, default=10, required=False, help="Maximum nstates=N")
+    parser.add_argument(
+        "--max_states", type=int, default=10, required=False, help="Maximum nstates=N"
+    )
     args = parser.parse_args()
 
     acceptor_file = args.acceptor_filename
@@ -185,14 +187,27 @@ def main():
     excited_states = args.excited_states
     max_states = args.max_states
 
-    dimer_tdm_1 = extract_tdm_xyz_values(dimer_file, excited_state=excited_states[0], max_states=max_states)
+    dimer_tdm_1 = extract_tdm_xyz_values(
+        dimer_file, excited_state=excited_states[0], max_states=max_states
+    )
     e1 = extract_vertical_excitation_energy(dimer_file, excited_state=excited_states[0])
-    dimer_tdm_2 = extract_tdm_xyz_values(dimer_file, excited_state=excited_states[1], max_states=max_states)
+    dimer_tdm_2 = extract_tdm_xyz_values(
+        dimer_file, excited_state=excited_states[1], max_states=max_states
+    )
     e2 = extract_vertical_excitation_energy(dimer_file, excited_state=excited_states[1])
-    acceptor_tdm = extract_tdm_xyz_values(acceptor_file, excited_state=1, max_states=max_states)
-    donor_tdm = extract_tdm_xyz_values(donor_file, excited_state=1, max_states=max_states)
+    acceptor_tdm = extract_tdm_xyz_values(
+        acceptor_file, excited_state=1, max_states=max_states
+    )
+    donor_tdm = extract_tdm_xyz_values(
+        donor_file, excited_state=1, max_states=max_states
+    )
 
-    if isinstance(dimer_tdm_1, str) or isinstance(dimer_tdm_2, str) or isinstance(acceptor_tdm, str) or isinstance(donor_tdm, str):
+    if (
+        isinstance(dimer_tdm_1, str)
+        or isinstance(dimer_tdm_2, str)
+        or isinstance(acceptor_tdm, str)
+        or isinstance(donor_tdm, str)
+    ):
         print("Error occurred while extracting TDM values.")
         return
 
@@ -210,4 +225,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

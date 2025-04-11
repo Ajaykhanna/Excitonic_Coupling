@@ -1,8 +1,8 @@
 """
-**Author**: Ajay Khanna  
-**Date**: Dec.10.2023  
-**Place**: UC Merced  
-**Lab**: Dr. Isborn  
+**Author**: Ajay Khanna
+**Date**: Dec.10.2023
+**Place**: UC Merced
+**Lab**: Dr. Isborn
 
 ### 📧 Contact Information
 
@@ -99,11 +99,11 @@ def extract_atomic_weights(log_file_path):
 def vertical_excitation_energies(file_path, excited_state=1):
     """
     Reads a file and extracts the vertical excitation energy for a specified excited state.
-    
+
     Parameters:
         file_path (str): The path to the file containing the vertical excitation energy data.
         excited_state (int, optional): The index of the excited state for which to extract the vertical excitation energy. Defaults to 1.
-    
+
     Returns:
         float: The vertical excitation energy in electron volts (eV) for the specified excited state.
     """
@@ -168,7 +168,6 @@ def extract_TDM_xyz_values(file_path):
     return np.array([tdm_x, tdm_y, tdm_z])
 
 
-
 def center_of_mass(atomic_weights, coordinates):
     """
     Calculates the center of mass of a system based on atomic weights and coordinates.
@@ -198,7 +197,6 @@ def center_of_mass(atomic_weights, coordinates):
     )
 
     return np.array([x_COM, y_COM, z_COM])
-
 
 
 def coupling_via_PDA(TDM_D, TDM_A, COM_D, COM_A):
